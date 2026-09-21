@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="SpamGuard AI analyzes suspicious messages instantly using Machine Learning and NLP." />
+  <meta name="theme-color" content="#EEF0FF" />
+  <title>SpamGuard AI — Machine Learning Spam Detection</title>
+
+  <!-- Tiny inline favicon so the browser does not request a missing /favicon.ico -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+
+  <!-- Fonts (optional): if they fail to load, the CSS falls back to system fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Our own styles (separate file) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body id="top">
+  <!-- Lets keyboard users jump past the navbar -->
+  <a class="skip-link" href="#detector">Skip to the detector</a>
+
+  <!-- ===================== 1. NAVBAR ===================== -->
+  <header class="navbar">
+    <nav class="navbar-inner" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="SpamGuard AI, back to top">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 9.5-4-1.3-7-5-7-9.5V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <span class="brand-name">SpamGuard AI</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#detector">Spam Detection</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===================== 2. HERO ===================== -->
+    <section class="hero container" aria-labelledby="hero-title">
+      <p class="badge">AI Powered • NLP • Machine Learning</p>
+      <h1 id="hero-title">Detect Spam with AI</h1>
+      <p class="hero-subtitle">Analyze suspicious messages instantly using Machine Learning and NLP.</p>
+    </section>
+
+    <!-- ===================== 3. PREDICTION CARD ===================== -->
+    <section id="detector" class="section container container--narrow" aria-labelledby="detector-title">
+      <div class="card predict-card">
+        <h2 id="detector-title">Analyze Your Message</h2>
+        <p id="detector-desc" class="card-lead">Enter an SMS or message below and let the AI determine whether it is spam.</p>
+
+        <!-- The label is visually hidden (the heading above already explains the box) but screen readers still read it -->
+        <label class="sr-only" for="message-input">Message to analyze</label>
+        <textarea
+          id="message-input"
+          name="message"
+          rows="6"
+          maxlength="500"
+          placeholder="Type or paste your message here..."
+          aria-describedby="detector-desc char-count"
+        ></textarea>
+
+        <div class="field-footer">
+          <span id="char-count" class="char-count">0 / 500</span>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="analyze-btn" class="btn btn-primary">
+            <svg class="icon btn-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="analyze-label">Analyze Message</span>
+          </button>
+          <button type="button" id="clear-btn" class="btn btn-secondary">Clear</button>
+        </div>
+
+        <!-- Friendly error message (hidden until something goes wrong) -->
+        <div id="error-box" class="alert" role="alert" hidden>
+          <svg class="icon alert-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <div>
+            <p id="error-title" class="alert-title"></p>
+            <p id="error-text" class="alert-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen-reader-only announcement of the result -->
+    <div id="sr-announcer" class="sr-only" role="status" aria-live="polite"></div>
+
+    <!-- ===================== 4 + 5. RESULT + ANALYSIS DETAILS ===================== -->
+    <section id="result-section" class="section container container--narrow" aria-labelledby="result-title" hidden>
+      <div id="result-card" class="card result-card">
+        <div class="result-head">
+          <div class="result-icon" aria-hidden="true">
+            <!-- Warning icon (shown for Spam) -->
+            <svg id="icon-spam" class="icon" width="32" height="32" viewBox="0 0 24 24" hidden><path d="M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <!-- Check icon (shown for Not Spam) -->
+            <svg id="icon-safe" class="icon" width="32" height="32" viewBox="0 0 24 24" hidden><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
+          </div>
+          <div>
+            <h2 id="result-title" class="result-title"></h2>
+            <p id="result-message" class="result-message"></p>
+          </div>
+        </div>
+
+        <div class="details">
+          <div class="detail">
+            <h3>Original Message</h3>
+            <p id="raw-text" class="detail-text"></p>
+          </div>
+          <div class="detail">
+            <h3>Processed Text</h3>
+            <p id="cleaned-text" class="detail-text detail-text--processed"></p>
+            <p class="detail-note">Lowercased, stripped of special characters and stopwords, then reduced to word stems.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 6. EXAMPLE MESSAGES ===================== -->
+    <section id="examples" class="section container" aria-labelledby="examples-title">
+      <div class="section-head">
+        <h2 id="examples-title">Try an Example</h2>
+        <p>Select a message to load it into the box above.</p>
+      </div>
+
+      <!-- To change an example, just edit the text inside its .example-text span -->
+      <ul class="examples">
+        <li>
+          <button type="button" class="example-card">
+            <span class="example-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></span>
+            <span class="example-text">Congratulations! You won a free iPhone. Click here now!</span>
+            <span class="example-cta">Use this message</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="example-card">
+            <span class="example-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></span>
+            <span class="example-text">Hey, are we still meeting at 5 PM today?</span>
+            <span class="example-cta">Use this message</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="example-card">
+            <span class="example-icon" aria-hidden="true"><svg class="icon" width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H10l-5 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></span>
+            <span class="example-text">URGENT! You have won $10,000. Claim your prize now!</span>
+            <span class="example-cta">Use this message</span>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===================== 7. HOW IT WORKS (also the "About" link target) ===================== -->
+    <section id="about" class="section container" aria-labelledby="about-title">
+      <div class="section-head">
+        <h2 id="about-title">How It Works</h2>
+        <p>From raw text to a spam verdict in four steps.</p>
+      </div>
+
+      <ol class="steps">
+        <li class="step card">
+          <div class="step-top">
+            <span class="step-icon" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+            <span class="step-number" aria-hidden="true">01</span>
+          </div>
+          <h3>Enter Message</h3>
+          <p>Paste an SMS or any short message into the text box.</p>
+        </li>
+
+        <li class="step card">
+          <div class="step-top">
+            <span class="step-icon" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/></svg></span>
+            <span class="step-number" aria-hidden="true">02</span>
+          </div>
+          <h3>Text Preprocessing</h3>
+          <p>The text is lowercased, cleaned of special characters and stopwords, and stemmed.</p>
+        </li>
+
+        <li class="step card">
+          <div class="step-top">
+            <span class="step-icon" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span>
+            <span class="step-number" aria-hidden="true">03</span>
+          </div>
+          <h3>Machine Learning Prediction</h3>
+          <p>A trained model reads the cleaned text and classifies the message.</p>
+        </li>
+
+        <li class="step card">
+          <div class="step-top">
+            <span class="step-icon" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 9.5-4-1.3-7-5-7-9.5V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
+            <span class="step-number" aria-hidden="true">04</span>
+          </div>
+          <h3>Spam Result</h3>
+          <p>You see whether the message is Spam or Not Spam, plus the processed text.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <!-- ===================== 8. FOOTER ===================== -->
+  <footer class="footer">
+    <p class="footer-title">SpamGuard AI — Machine Learning Spam Detection</p>
+    <p class="footer-sub">Built with FastAPI • Python • NLP • Machine Learning</p>
+  </footer>
+
+  <!-- Our own JavaScript (separate file) -->
+  <script src="script.js"></script>
+</body>
+</html>
