@@ -4,26 +4,37 @@ import nltk
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
-# NLTK-এর প্রয়োজনীয় ডাটা ডাউনলোড
+# NLTK-এর প্রয়োজনীয় ডাটা ডাউনলোড (punkt_tab সহ)
 nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 
 # FastAPI App ইনিশিয়ালাইজেশন
 app = FastAPI()
 
-# static ফোল্ডার মাউন্ট করা (HTML, CSS, JS এর জন্য)
+# CORS Middleware (ব্রাউজারের API Blocking প্রতিরোধ করার জন্য)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# static ফোল্ডার মাউন্ট করা
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # PorterStemmer এবং Stopwords লোড
 ps = PorterStemmer()
 stop_words = set(stopwords.words('english'))
 
-# Pickle ফাইল নিরাপদে লোড করা (Path handling সহ)
+# Pickle ফাইল লোড করা (Path handling সহ)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, 'model.pkl')
 vectorizer_path = os.path.join(BASE_DIR, 'vectorizer.pkl')
@@ -52,11 +63,14 @@ class SMSRequest(BaseModel):
 def home():
     return FileResponse("static/index.html")
 
+# Predict Endpoint
 @app.post("/predict")
 def predict_spam(data: SMSRequest):
     cleaned_text = transform_text(data.text)
     transformed_text = vectorizer.transform([cleaned_text])
-    prediction = model.predict(transformed_text)[0]
+    
+    # model.predict রিটার্ন টাইপ int এ রূপান্তর করা (JSON serialization-এর জন্য)
+    prediction = int(model.predict(transformed_text)[0])
     result = "Spam" if prediction == 1 else "Not Spam"
     
     return {
